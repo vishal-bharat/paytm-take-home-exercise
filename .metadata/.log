@@ -1,0 +1,22 @@
+!SESSION 2026-10-01 17:02:12.412 -----------------------------------------------
+eclipse.buildId=4.38.0.20251204-0849
+java.version=21.0.10
+java.vendor=Eclipse Adoptium
+BootLoader constants: OS=macosx, ARCH=aarch64, WS=cocoa, NL=en_IN
+Framework arguments:  -product org.eclipse.epp.package.jee.product -keyring /Users/vishalbharat/.eclipse_keyring
+Command-line arguments:  -os macosx -ws cocoa -arch aarch64 -product org.eclipse.epp.package.jee.product -keyring /Users/vishalbharat/.eclipse_keyring
+
+!ENTRY org.eclipse.emf.ecore 2 0 2026-10-01 17:02:13.957
+!MESSAGE Both 'com.sap.adt.testdoubles.cds.model' and 'com.sap.adt.testdoubles.cds.model' register a package for 'http://www.sap.com/adt/dbtestdoubles/cds/testcases'
+
+!ENTRY org.eclipse.emf.ecore 2 0 2026-10-01 17:02:13.958
+!MESSAGE Both 'com.sap.adt.testdoubles.cds.model' and 'com.sap.adt.testdoubles.cds.model' register a package for 'http://www.sap.com/adt/dbtestdoubles/cds/testcases'
+
+!ENTRY org.eclipse.emf.ecore 2 0 2026-10-01 17:02:13.964
+!MESSAGE Both 'com.sap.adt.testdoubles.cds.model' and 'com.sap.adt.testdoubles.cds.model' register an extension parser for 'cdstestcases'
+
+!ENTRY ch.qos.logback.classic 1 0 2026-10-01 17:02:14.097
+!MESSAGE Activated before the state location was initialized. Retry after the state location is initialized.
+
+!ENTRY ch.qos.logback.classic 1 0 2026-10-01 17:02:31.945
+!MESSAGE Logback config file: /Users/vishalbharat/Downloads/seats/.metadata/.plugins/org.eclipse.m2e.logback/logback.2.7.101.20251017-1242.xml
