@@ -23,6 +23,8 @@ services:
       DB_URL: jdbc:postgresql://db:5432/seats
       DB_USER: seats
       DB_PASSWORD: ${POSTGRES_PASSWORD:-seats}
+      JWT_SECRET: ${JWT_SECRET:-dev-only-secret-change-me-0123456789abcdef}
+      ADMIN_KEY: ${ADMIN_KEY:-dev-admin-key}
     ports:
       - "8080:8080"
     ulimits:

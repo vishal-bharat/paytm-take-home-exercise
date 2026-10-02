@@ -17,7 +17,7 @@ spring:
 server:
   shutdown: graceful
   tomcat:
-    max-connections: 20000     
+    max-connections: 20000       
     accept-count: 1000
 
 management:
@@ -37,3 +37,9 @@ logging:
   structured:
     format:
       console: logstash
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:dev-only-secret-change-me-0123456789abcdef}
+    ttl: ${JWT_TTL:PT2H}
+  admin-key: ${ADMIN_KEY:dev-admin-key}
