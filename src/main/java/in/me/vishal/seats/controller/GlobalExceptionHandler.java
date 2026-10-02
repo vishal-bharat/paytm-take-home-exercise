@@ -1,6 +1,7 @@
 package in.me.vishal.seats.controller;
 
 import in.me.vishal.seats.dto.ErrorResponse;
+import in.me.vishal.seats.exception.DeclineException;
 import in.me.vishal.seats.exception.ShowNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -34,5 +35,11 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse showNotFound(ShowNotFoundException e) {
         return new ErrorResponse("show_not_found", e.getMessage());
+    }
+    
+    @ExceptionHandler(DeclineException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorResponse declined(DeclineException e) {
+        return new ErrorResponse(e.reason().code(), null);
     }
 }

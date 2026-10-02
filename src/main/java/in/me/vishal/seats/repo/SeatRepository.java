@@ -4,6 +4,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
  
 import java.util.List;
+import java.util.UUID;
  
 @Repository
 public class SeatRepository {
@@ -34,5 +35,35 @@ public class SeatRepository {
                         """,
                 (rs, i) -> new SeatRow(rs.getString("label"), rs.getString("status")),
                 showId);
+    }
+    
+    public boolean anyConfirmed(long showId, List<String> labels) {
+        Boolean taken = jdbc.queryForObject("""
+                SELECT EXISTS (
+                    SELECT 1 FROM seats
+                    WHERE show_id = ? AND label = ANY(?::text[]) AND status = 'confirmed'
+                )
+                """, Boolean.class, showId, labels.toArray(String[]::new));
+        return Boolean.TRUE.equals(taken);
+    }
+ 
+    public List<SeatRow> lockForUpdate(long showId, List<String> sortedLabels) {
+        return jdbc.query("""
+                        SELECT label, status
+                        FROM seats
+                        WHERE show_id = ? AND label = ANY(?::text[])
+                        ORDER BY label
+                        FOR UPDATE
+                        """,
+                (rs, i) -> new SeatRow(rs.getString("label"), rs.getString("status")),
+                showId, sortedLabels.toArray(String[]::new));
+    }
+ 
+    public int confirm(long showId, List<String> labels, String userId, UUID reservationId) {
+        return jdbc.update("""
+                UPDATE seats
+                SET status = 'confirmed', user_id = ?, reservation_id = ?
+                WHERE show_id = ? AND label = ANY(?::text[]) AND status = 'available'
+                """, userId, reservationId, showId, labels.toArray(String[]::new));
     }
 }
