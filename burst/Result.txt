@@ -1,0 +1,32 @@
+root@srv1114338:~/seats/paytm-take-home-exercise# ADMIN_KEY=dev-admin-key ./burst/burst.sh https://paytm.vishal.me.in
+Burst against https://paytm.vishal.me.in  (show 16, 1000 seats, limit 4, run d9a3d6, seed 8575373363106057)
+Minting 5659 tokens...
+Firing 20000 requests (max in flight 20000)...
+
+Requests: 20,000   Duration: 16.7s   Throughput: 1,200 req/s
+
+Outcomes
+  200 idempotent_replay                   400
+  201 confirmed                           785
+  409 idempotency_conflict                 25
+  409 per_user_limit                      120
+  409 seat_taken                       18,670
+
+Latency  p50 5892ms  p95 11974ms  p99 13087ms  max 14221ms
+
+Checks
+  zero 5xx                                     PASS  0 reserve 5xx, 0 poll 5xx
+  zero transport errors                        PASS  0 (client-side; see breakdown above)
+  only 200/201/409                             PASS  0 other 4xx
+  hot seats: exactly one 201 each              PASS  A1: 1/500  A2: 1/500  A3: 1/500  A4: 1/500  A5: 1/500
+  no seat sold twice                           PASS  0 seats in more than one 201
+  reconciliation after burst                   PASS  available 145 + held 0 + confirmed 855 = 1000 (total 1000)
+  API confirmed == seats in 201s               PASS  API 855, from 201 responses 855
+  reconciliation during burst                  PASS  3 polls, 0 mismatches
+  idempotent retries: one reservation per key  PASS  100 keys, 0 wrong
+  same key, different body -> 409              PASS  25 keys, 0 wrong
+  per-user limit holds                         PASS  20 users at exactly 4 (0 wrong), max held by anyone 4
+  identity from token only                     PASS  10 spoofed requests, 0 wrong
+  metrics: confirmed counter == 201s           PASS  counter +785, 201s 785 (other traffic during the run skews this)
+
+RESULT: ALL CHECKS PASSED
