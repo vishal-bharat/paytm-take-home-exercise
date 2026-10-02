@@ -2,8 +2,12 @@ package in.me.vishal.seats.service;
 
 import in.me.vishal.seats.dto.CreateShowRequest;
 import in.me.vishal.seats.dto.ShowCreatedResponse;
+import in.me.vishal.seats.dto.ShowResponse;
+import in.me.vishal.seats.exception.ShowNotFoundException;
 import in.me.vishal.seats.repo.SeatRepository;
+import in.me.vishal.seats.repo.SeatRepository.SeatRow;
 import in.me.vishal.seats.repo.ShowRepository;
+import in.me.vishal.seats.repo.ShowRepository.ShowRow;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
  
@@ -25,7 +29,6 @@ public class ShowService {
         this.seats = seats;
     }
  
-    /** Show row and seat rows commit together, or not at all. */
     @Transactional
     public ShowCreatedResponse create(CreateShowRequest req) {
         String name = (req.name() == null || req.name().isBlank()) ? "show" : req.name().trim();
@@ -39,6 +42,31 @@ public class ShowService {
         long id = shows.insert(name, price, limit, labels.size());
         seats.insertAll(id, labels);
         return new ShowCreatedResponse(id, name, price, limit, labels.size());
+    }
+ 
+    
+    @Transactional(readOnly = true)
+    public ShowResponse get(long showId) {
+        ShowRow show = shows.find(showId).orElseThrow(() -> new ShowNotFoundException(showId));
+        List<SeatRow> rows = seats.findByShow(showId);
+ 
+        int available = 0;
+        int confirmed = 0;
+        for (SeatRow row : rows) {
+            switch (row.status()) {
+                case "available" -> available++;
+                case "confirmed" -> confirmed++;
+                default -> throw new IllegalStateException("unknown seat status: " + row.status());
+            }
+        }
+        int held = 0; // explicit-cancel model: reserve goes straight to confirmed, nothing is ever held
+ 
+        List<ShowResponse.Seat> seatViews = rows.stream()
+                .map(r -> new ShowResponse.Seat(r.label(), r.status()))
+                .toList();
+ 
+        return new ShowResponse(show.id(), show.name(), show.pricePaise(), show.perUserLimit(),
+                show.totalSeats(), new ShowResponse.Counts(available, held, confirmed), seatViews);
     }
  
     private static long requirePrice(Long pricePaise) {

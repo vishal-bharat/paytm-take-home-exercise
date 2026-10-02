@@ -7,6 +7,9 @@ import java.util.List;
  
 @Repository
 public class SeatRepository {
+	
+    public record SeatRow(String label, String status) {
+    }
  
     private final JdbcTemplate jdbc;
  
@@ -20,5 +23,16 @@ public class SeatRepository {
                 INSERT INTO seats (show_id, label)
                 SELECT ?, unnest(?::text[])
                 """, showId, labels.toArray(String[]::new));
+    }
+    
+    public List<SeatRow> findByShow(long showId) {
+        return jdbc.query("""
+                        SELECT label, status
+                        FROM seats
+                        WHERE show_id = ?
+                        ORDER BY label
+                        """,
+                (rs, i) -> new SeatRow(rs.getString("label"), rs.getString("status")),
+                showId);
     }
 }
