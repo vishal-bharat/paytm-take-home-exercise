@@ -13,7 +13,6 @@ after a burst.
 | Health (liveness) | https://paytm.vishal.me.in/actuator/health/liveness |
 | Health (readiness, checks the DB) | https://paytm.vishal.me.in/actuator/health/readiness |
 | Prometheus metrics | https://paytm.vishal.me.in/actuator/prometheus |
-| Live logs (read-only, app container only) | https://paytm.vishal.me.in/logs |
 
 Stack: Java 21, Spring Boot 4, PostgreSQL 17, plain JDBC (`JdbcTemplate`), Flyway, Micrometer,
 Docker Compose, nginx + Let's Encrypt.
@@ -44,7 +43,7 @@ Access rules (deny by default):
 
 | Endpoint | Access |
 |---|---|
-| `POST /auth/token`, `GET /shows/{id}`, `/actuator/**`, `/logs` | public |
+| `POST /auth/token`, `GET /shows/{id}`, `/actuator/**`| public |
 | `POST /shows` | `X-Admin-Key` |
 | everything else | valid bearer token |
 
