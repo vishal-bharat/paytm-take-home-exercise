@@ -66,4 +66,12 @@ public class SeatRepository {
                 WHERE show_id = ? AND label = ANY(?::text[]) AND status = 'available'
                 """, userId, reservationId, showId, labels.toArray(String[]::new));
     }
+    
+    public int release(long showId, UUID reservationId) {
+        return jdbc.update("""
+                UPDATE seats
+                SET status = 'available', user_id = NULL, reservation_id = NULL
+                WHERE show_id = ? AND reservation_id = ? AND status = 'confirmed'
+                """, showId, reservationId);
+    }
 }

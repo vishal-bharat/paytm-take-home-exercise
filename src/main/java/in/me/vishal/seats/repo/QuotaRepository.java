@@ -29,4 +29,13 @@ public class QuotaRepository {
                 """, n, showId, userId, n, limit);
         return updated == 1;
     }
+    
+    public boolean release(long showId, String userId, int n) {
+        int updated = jdbc.update("""
+                UPDATE user_show_quota
+                SET used = used - ?
+                WHERE show_id = ? AND user_id = ? AND used >= ?
+                """, n, showId, userId, n);
+        return updated == 1;
+    }
 }

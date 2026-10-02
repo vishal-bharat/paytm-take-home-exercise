@@ -1,26 +1,38 @@
 package in.me.vishal.seats.repo;
 
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
- 
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
- 
+
 @Repository
 public class ReservationRepository {
- 
-    public record ReservationRow(UUID id, long showId, List<String> seats, long amountPaise,
+
+    public record ReservationRow(UUID id, long showId, String userId, List<String> seats, long amountPaise,
                                  String status, String requestHash) {
     }
- 
+
+    private static final String COLUMNS = "id, show_id, user_id, seats, amount_paise, status, request_hash";
+
+    private static final RowMapper<ReservationRow> ROW = (rs, i) -> new ReservationRow(
+            rs.getObject("id", UUID.class),
+            rs.getLong("show_id"),
+            rs.getString("user_id"),
+            Arrays.asList((String[]) rs.getArray("seats").getArray()),
+            rs.getLong("amount_paise"),
+            rs.getString("status"),
+            rs.getString("request_hash"));
+
     private final JdbcTemplate jdbc;
- 
+
     public ReservationRepository(JdbcTemplate jdbc) {
         this.jdbc = jdbc;
     }
- 
+
     public Optional<UUID> insertPending(long showId, String userId, List<String> seats, long amountPaise,
                                         String idempotencyKey, String requestHash) {
         return jdbc.query("""
@@ -34,25 +46,22 @@ public class ReservationRepository {
                 showId, userId, seats.toArray(String[]::new), amountPaise, idempotencyKey, requestHash
         ).stream().findFirst();
     }
- 
+
     public Optional<ReservationRow> findByKey(String userId, String idempotencyKey) {
-        return jdbc.query("""
-                        SELECT id, show_id, seats, amount_paise, status, request_hash
-                        FROM reservations
-                        WHERE user_id = ? AND idempotency_key = ?
-                        """,
-                (rs, i) -> new ReservationRow(
-                        rs.getObject("id", UUID.class),
-                        rs.getLong("show_id"),
-                        Arrays.asList((String[]) rs.getArray("seats").getArray()),
-                        rs.getLong("amount_paise"),
-                        rs.getString("status"),
-                        rs.getString("request_hash")),
-                userId, idempotencyKey
-        ).stream().findFirst();
+        return jdbc.query("SELECT " + COLUMNS + " FROM reservations WHERE user_id = ? AND idempotency_key = ?",
+                ROW, userId, idempotencyKey).stream().findFirst();
     }
- 
+
+    public Optional<ReservationRow> lockById(UUID id) {
+        return jdbc.query("SELECT " + COLUMNS + " FROM reservations WHERE id = ? FOR UPDATE",
+                ROW, id).stream().findFirst();
+    }
+
     public void markConfirmed(UUID id) {
         jdbc.update("UPDATE reservations SET status = 'confirmed' WHERE id = ?", id);
+    }
+
+    public void markCancelled(UUID id) {
+        jdbc.update("UPDATE reservations SET status = 'cancelled' WHERE id = ?", id);
     }
 }

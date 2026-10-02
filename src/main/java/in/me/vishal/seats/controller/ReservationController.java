@@ -5,6 +5,9 @@ import in.me.vishal.seats.dto.ReserveRequest;
 import in.me.vishal.seats.service.ReservationService;
 import in.me.vishal.seats.service.ReservationService.Result;
 import in.me.vishal.seats.security.JwtAuthFilter;
+
+import java.util.UUID;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -41,5 +44,12 @@ public class ReservationController {
             return ResponseEntity.ok().header("Idempotent-Replayed", "true").body(result.reservation());
         }
         return ResponseEntity.status(HttpStatus.CREATED).body(result.reservation());
+    }
+    
+    @PostMapping("/reservations/{id}/cancel")
+    public ReservationResponse cancel(
+            @PathVariable UUID id,
+            @RequestAttribute(JwtAuthFilter.USER_ID) String userId) {
+        return reservations.cancel(id, userId);
     }
 }
