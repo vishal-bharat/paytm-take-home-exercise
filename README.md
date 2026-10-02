@@ -1,6 +1,6 @@
 # Seat Reservation Service
 
-#I want to disclose upfront that a substantial part of the code and documentation was drafted with an AI model.
+# I want to disclose upfront that a substantial part of the code and documentation was drafted with an AI model.
 
 A JSON HTTP API that sells assigned seats under heavy concurrency. Every hot seat goes to exactly
 one buyer, nobody gets a 5xx, and `available + held + confirmed == total_seats` holds during and
