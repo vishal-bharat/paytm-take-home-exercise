@@ -7,6 +7,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import in.me.vishal.seats.observability.RequestIdFilter;
+import org.slf4j.MDC;
  
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -67,6 +69,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             return;
         }
         req.setAttribute(USER_ID, userId.get());
+        MDC.put(RequestIdFilter.MDC_USER_ID, userId.get());
         chain.doFilter(req, res);
     }
  

@@ -104,20 +104,20 @@ public class ReservationService {
         return new Result(new ReservationResponse(reservationId, show.id(), labels, amount, "confirmed"), false);
     }
 
-    public ReservationResponse cancel(UUID reservationId, String userId) {
+    public Result cancel(UUID reservationId, String userId) {
         return inTransaction(status -> {
             ReservationRow row = reservations.lockById(reservationId)
                     .filter(r -> r.userId().equals(userId))   // someone else's = not found
                     .orElseThrow(() -> new ReservationNotFoundException(reservationId));
-
+ 
             if ("cancelled".equals(row.status())) {
-                return toResponse(row, "cancelled");
+                return new Result(toResponse(row, "cancelled"), true);
             }
-
+ 
             if (!quotas.release(row.showId(), userId, row.seats().size())) {
                 throw new IllegalStateException("quota row missing for reservation " + reservationId);
             }
-
+ 
             List<String> labels = row.seats().stream().sorted().toList();
             seats.lockForUpdate(row.showId(), labels);
             int freed = seats.release(row.showId(), reservationId);
@@ -127,7 +127,7 @@ public class ReservationService {
                         + " seats, expected " + labels.size());
             }
             reservations.markCancelled(reservationId);
-            return toResponse(row, "cancelled");
+            return new Result(toResponse(row, "cancelled"), false);
         });
     }
 
